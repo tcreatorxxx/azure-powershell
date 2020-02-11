@@ -50,8 +50,8 @@ namespace Microsoft.Azure.Commands.Common.Authentication.Authentication.Clients
         {
             lock (_lock)
             {
-                byte[] blob;
-                if (_memoryCache.TryGetValue(_cacheId, out blob))
+                byte[] blob = AzureSession.Instance.TokenCache?.CacheData;
+                if (blob != null || _memoryCache.TryGetValue(_cacheId, out blob))
                 {
                     args.TokenCache.DeserializeMsalV3(blob);
                 }
@@ -61,6 +61,7 @@ namespace Microsoft.Azure.Commands.Common.Authentication.Authentication.Clients
         private void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             byte[] blob = args.TokenCache.SerializeMsalV3();
+            AzureSession.Instance.TokenCache.CacheData = blob;
             _memoryCache.Set(_cacheId, blob);
         }
 
@@ -95,6 +96,7 @@ namespace Microsoft.Azure.Commands.Common.Authentication.Authentication.Clients
         public override void ClearCache()
         {
             _memoryCache.Set(_cacheId, new byte[] { });
+            AzureSession.Instance.TokenCache?.Clear();
         }
     }
 }

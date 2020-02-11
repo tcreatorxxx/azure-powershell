@@ -120,7 +120,7 @@ namespace Microsoft.Azure.Commands.ResourceManager.Common
             {
                 if (_serializeCache)
                 {
-                    value = new CacheBuffer { CacheData = cache.CacheData };
+                    value = new CacheBuffer { CacheData = cache.CacheData ?? AzureSession.Instance.TokenCache?.CacheData };
                 }
                 else
                 {
