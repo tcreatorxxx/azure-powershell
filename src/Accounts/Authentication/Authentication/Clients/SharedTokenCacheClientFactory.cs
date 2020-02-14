@@ -58,6 +58,7 @@ namespace Microsoft.Azure.Commands.Common.Authentication
                         // replace the handler with the real one
                         var cacheHelper = GetCacheHelper(client.AppConfig.ClientId);
                         cacheHelper.RegisterCache(client.UserTokenCache);
+                        client.UserTokenCache.SetBeforeWrite(BeforeWriteNotification);
                     }
                 });
             }
@@ -65,6 +66,7 @@ namespace Microsoft.Azure.Commands.Common.Authentication
             {
                 var cacheHelper = GetCacheHelper(client.AppConfig.ClientId);
                 cacheHelper.RegisterCache(client.UserTokenCache);
+                client.UserTokenCache.SetBeforeWrite(BeforeWriteNotification);
             }
         }
 
@@ -80,6 +82,14 @@ namespace Microsoft.Azure.Commands.Common.Authentication
                     return;
                 default:
                     return;
+            }
+        }
+
+        private void BeforeWriteNotification(TokenCacheNotificationArgs args)
+        {
+            if (AzureSession.Instance.TokenCache != null)
+            {
+                AzureSession.Instance.TokenCache.CacheData = args.TokenCache?.SerializeMsalV3();
             }
         }
 
@@ -101,6 +111,7 @@ namespace Microsoft.Azure.Commands.Common.Authentication
         {
             var cacheHelper = GetCacheHelper(PowerShellClientId);
             cacheHelper.Clear();
+            AzureSession.Instance.TokenCache?.Clear();
         }
     }
 }
