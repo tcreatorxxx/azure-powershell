@@ -27,6 +27,19 @@ namespace Microsoft.Azure.Commands.Common.Authentication
         public static readonly string CacheFilePath =
             Path.Combine(SharedUtilities.GetUserRootDirectory(), ".IdentityService", "msal.cache");
 
+        public override void ReadTokenData()
+        {
+            if (TokenCacheData == null)
+            {
+                TryReadTokenFromFileCache(CacheFilePath);
+            }
+        }
+
+        public override void WriteTokenData(byte[] data)
+        {
+            WriteTokenToFileCache(data, CacheFilePath);
+        }
+
         private CacheMigrationSettings _cacheMigrationSettings;
 
         public SharedTokenCacheClientFactory() { }
@@ -87,9 +100,10 @@ namespace Microsoft.Azure.Commands.Common.Authentication
 
         private void BeforeWriteNotification(TokenCacheNotificationArgs args)
         {
+            TokenCacheData = args.TokenCache?.SerializeMsalV3();
             if (AzureSession.Instance.TokenCache != null)
             {
-                AzureSession.Instance.TokenCache.CacheData = args.TokenCache?.SerializeMsalV3();
+                AzureSession.Instance.TokenCache.CacheData = TokenCacheData;
             }
         }
 
@@ -111,7 +125,7 @@ namespace Microsoft.Azure.Commands.Common.Authentication
         {
             var cacheHelper = GetCacheHelper(PowerShellClientId);
             cacheHelper.Clear();
-            AzureSession.Instance.TokenCache?.Clear();
+            TokenCacheData = null;
         }
     }
 }

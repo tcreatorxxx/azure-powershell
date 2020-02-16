@@ -17,8 +17,8 @@ using Microsoft.Azure.Commands.Common.Authentication.Abstractions;
 using Microsoft.Azure.Commands.Common.Authentication.Models;
 using Microsoft.Azure.Commands.Common.Authentication.ResourceManager;
 using Microsoft.Azure.Commands.Profile.Common;
-using Microsoft.Azure.Commands.Profile.Models;
 // TODO: Remove IfDef
+using Microsoft.Azure.Commands.Common.Authentication.Authentication.Clients;
 #if NETSTANDARD
 using Microsoft.Azure.Commands.Common.Authentication.Core;
 using Microsoft.Azure.Commands.Profile.Models.Core;
@@ -76,8 +76,24 @@ namespace Microsoft.Azure.Commands.Profile
                 target.TrySetDefaultContext(source.DefaultContextKey);
             }
 
-            AzureRmProfileProvider.Instance.SetTokenCacheForProfile(target.ToProfile());
-            EnsureProtectedCache(target, source.DefaultContext?.TokenCache?.CacheData);
+            //AzureRmProfileProvider.Instance.SetTokenCacheForProfile(target.ToProfile());
+            //EnsureProtectedCache(target, source.DefaultContext?.TokenCache?.CacheData);
+            EnsureProtectedMsalCache(target);
+        }
+
+        void EnsureProtectedMsalCache(IProfileOperations profile)
+        {
+            if(profile == null)
+            {
+                return;
+            }
+
+            if (AzureSession.Instance.TryGetComponent(
+                AuthenticationClientFactory.AuthenticationClientFactoryKey,
+                out AuthenticationClientFactory authenticationClientFactory))
+            {
+                authenticationClientFactory.WriteTokenData(authenticationClientFactory.TokenCacheData);
+            }
         }
 
         void EnsureProtectedCache(IProfileOperations profile, byte[] cacheData)
@@ -93,6 +109,12 @@ namespace Microsoft.Azure.Commands.Profile
             {
                 try
                 {
+                    if (AzureSession.Instance.TryGetComponent(
+                        AuthenticationClientFactory.AuthenticationClientFactoryKey,
+                        out AuthenticationClientFactory authenticationClientFactory))
+                    {
+                        authenticationClientFactory.WriteTokenData(cacheData);
+                    }
                     var cache = new ProtectedFileTokenCache(cacheData, AzureSession.Instance.DataStore);
                 }
                 catch
@@ -119,7 +141,7 @@ namespace Microsoft.Azure.Commands.Profile
 
                     ModifyProfile((profile) =>
                     {
-                        CopyProfile(new AzureRmProfile(Path), profile);
+                        CopyProfile(new AzureRmProfile(Path, false), profile);
                         executionComplete = true;
                     });
                 });
