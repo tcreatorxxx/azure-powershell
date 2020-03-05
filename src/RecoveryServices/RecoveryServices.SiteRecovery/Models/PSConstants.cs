@@ -473,6 +473,11 @@ namespace Microsoft.Azure.Commands.RecoveryServices.SiteRecovery
         public const string Standard_SSD = "Standard_SSD";
 
         /// <summary>
+        ///     Represents StandardSSD_LRS storage account.
+        /// </summary>
+        public const string StandardSSD_LRS = "StandardSSD_LRS";
+
+        /// <summary>
         ///     Azure VM temporary disk name, to be excluded as part of switch protection.
         /// </summary>
         public const string TemporaryStorage = "Temporary Storage";

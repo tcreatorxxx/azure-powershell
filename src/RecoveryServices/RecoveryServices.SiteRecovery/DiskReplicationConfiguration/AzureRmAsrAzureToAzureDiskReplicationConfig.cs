@@ -84,7 +84,8 @@ namespace Microsoft.Azure.Commands.RecoveryServices.SiteRecovery
         [ValidateSet(
             Constants.Premium_LRS,
             Constants.Standard_LRS,
-            Constants.Standard_SSD)]
+            Constants.Standard_SSD,
+            Constants.StandardSSD_LRS)]
         public string RecoveryReplicaDiskAccountType { get; set; }
 
         /// <summary>
@@ -95,7 +96,8 @@ namespace Microsoft.Azure.Commands.RecoveryServices.SiteRecovery
         [ValidateSet(
             Constants.Premium_LRS,
             Constants.Standard_LRS,
-            Constants.Standard_SSD)]
+            Constants.Standard_SSD,
+            Constants.StandardSSD_LRS)]
         public string RecoveryTargetDiskAccountType { get; set; }
 
         /// <summary>
